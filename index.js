@@ -23,10 +23,10 @@ app.listen(4000, () => {
   console.log("App listening on port 4000");
 });
 
-app.get("/", (req, res) => {
+app.get("/", async(req, res) => {
     const blogposts = await BlogPost.find({})
     res.render('index',{
-        blogposts:blogposts
+        blogposts
     });
 })
 app.get("/about", (req, res) => {
@@ -47,3 +47,38 @@ app.post('/posts/store', async(req,res) =>{
     await BlogPost.create(req.body)
     res.redirect('/')
 })
+
+/*  search  
+app.get('/search',(req,res)=>{  
+  try {  
+  bookModel.find({$or:[{author:{'$regex':req.query.dsearch}},{books:{'$regex':req.query.dsearch}}]},(err,data)=>{  
+  if(err){  
+  console.log(err);  
+  }else{  
+  res.render('pages/home',{data:data});  
+  }  
+  })  
+  } catch (error) {  
+  console.log(error);  
+  }  
+  });  
+  app.post('/',(req,res)=>{  
+  try {  
+  var books = new bookModel({  
+  author:req.body.author,  
+  books:req.body.book  
+  });  
+  books.save((err,data)=>{  
+  if(err){  
+  console.log(err)  
+  }else{  
+  res.redirect('/');  
+  }  
+  })  
+  } catch (error) {  
+  console.log(error);  
+  }  
+  });
+  */
+
+
