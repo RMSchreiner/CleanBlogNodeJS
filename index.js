@@ -6,27 +6,32 @@ mongoose.connect("mongodb://localhost/my_database", {
   useNewUrlParser: true,
 });
 
-
 const app = new express();
 const ejs = require("ejs");
+const {resourceUsage} = require('process');
 
-const fileUpload = require('express-fileupload')
+const fileUpload = require('express-fileupload');
 
-const BlogPost = require('./models/BlogPost.js')
+const BlogPost = require('./models/BlogPost');
 
 app.set("view engine", "ejs");
 
-app.use(express.static("public"));
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-app.use(fileUpload())
+const validateMiddleWare = (req,res,next) => {
+  if(req.files == null || req.body.title == null){
+    return res.redirect('/posts/new') //this is a redirect for if the files in null it redirects back to new post
+  }
+  next() //middle ware closes with next()
+};
 
-app.listen(4000, () => {
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(fileUpload());
+app.use('/posts/store/',validateMiddleWare);
+
+app.listen(4000,() => {
   console.log("App listening on port 4000");
 });
-
-const { start } = require("repl");
-//mongoose.connect(process.env.DATABASE_URL, {
 
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
@@ -34,17 +39,21 @@ db.once("open", () => console.log("Connected to Mongoose"));
 
 app.get("/", async(req, res) => {
     const blogposts = await BlogPost.find({})
+    console.log(blogposts)
     res.render('index',{
         blogposts
     });
-})
+});
+
 app.get("/about", (req, res) => {
   res.render("about");
   
 });
+
 app.get("/contact", (req, res) => {
   res.render("contact");
 });
+
 app.get("/post/:id",async (req,res) => {
   const blogpost = await BlogPost.findById(req.params.id)
   res.render('post',{
@@ -57,10 +66,12 @@ app.get("/posts/new", (req, res) => {
 });
 
 app.post('/posts/store',async (req,res) =>{
-  let image = req.files.image;
-  image.mv/(path.resolve(__dirname,'public/img',image.name),async(error)=>{
+  let image = req.files.image
+  image.mv(path.resolve(__dirname,'public/img',image.name),async(error)=>{
     //model creates a new doc with browser data
-    await BlogPost.create({...req.body,image:'/img/'+image.name})
+    await BlogPost.create({...req.body,
+      image:'/img/'+image.name
+    })
     res.redirect('/');
 });
 });
