@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 
 mongoose.connect("mongodb://localhost/my_database", {
   useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 const app = new express();
@@ -19,6 +20,8 @@ const homeController = require('./controllers/home')
 const newPostController = require('./controllers/newPost')
 const storePostController = require('./controllers/storePost')
 const getPostController = require('./controllers/getPosts')
+const newUserController = require('./controllers/newUser')
+const storeUserController = require('./controllers/storeUsers')
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -39,7 +42,8 @@ app.get('/',homeController)
 app.get('/posts/new',newPostController)
 app.get('/post/:id',getPostController);
 app.post('/posts/store',storePostController);
-
+app.get('/auth/register', newUserController)
+app.post('/users/register', storeUserController)
 app.get("/about", (req, res) => {
   res.render("about");
 })
