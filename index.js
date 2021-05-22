@@ -19,6 +19,7 @@ const {resourceUsage} = require('process');
 const fileUpload = require('express-fileupload');
 const validateMiddleware = require("./middleware/validateMiddleware");
 const expressSession = require('express-session');
+const flash = require('connect-flash')
 const authMiddleware = require('./middleware/authMiddleware');
 const redirectIfAuthenticatedMiddleware = require('./middleware/redirectIfAuthenticatedMiddleware')
 
@@ -33,9 +34,10 @@ const { start } = require("repl");
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(fileUpload());
+app.use(fileUpload({createParentPath:true}));
 app.use('/posts/store/',validateMiddleware);
 app.use(expressSession({secret:'keyboard cat'}));
+app.use(flash());
 
 app.use("*",(req,res,next) =>{
   loggedIn = req.session.userId;
@@ -51,7 +53,7 @@ const newPostController = require('./controllers/newPost')
 const storePostController = require('./controllers/storePost')
 const getPostController = require('./controllers/getPosts')
 const newUserController = require('./controllers/newUser')
-const storeUserController = require('./controllers/storeUsers')
+const storeUserController = require('./controllers/storeUser')
 const loginController = require('./controllers/login')
 const loginUserController = require('./controllers/loginUser');
 const logoutController = require('./controllers/logout');
@@ -66,6 +68,7 @@ app.post('/users/register',redirectIfAuthenticatedMiddleware,storeUserController
 app.get('/auth/login',redirectIfAuthenticatedMiddleware,loginController)
 app.post('/users/login',redirectIfAuthenticatedMiddleware,loginUserController)
 app.get('/auth/logout',logoutController)
+app.use((req,res)=>res.render('notfound'));
 
 // app.use((req,res)=>{
 //   res.render('notfound')
